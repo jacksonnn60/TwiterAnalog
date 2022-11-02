@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		79771EFE2912A88D00EF974D /* SignUpViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79771EFD2912A88D00EF974D /* SignUpViewModel.swift */; };
 		79771F002912AE3100EF974D /* SignInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79771EFF2912AE3100EF974D /* SignInViewModel.swift */; };
+		79771F022912B35700EF974D /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79771F012912B35700EF974D /* ViewModel.swift */; };
 		797C9566291127BB0009BDBA /* NewFeedbackContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 797C9565291127BB0009BDBA /* NewFeedbackContentView.swift */; };
 		79B7E2FB2907BAB8000C5D8F /* TwitterAnalogApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79B7E2FA2907BAB8000C5D8F /* TwitterAnalogApp.swift */; };
 		79B7E2FD2907BAB8000C5D8F /* SignUpContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79B7E2FC2907BAB8000C5D8F /* SignUpContentView.swift */; };
@@ -45,6 +46,7 @@
 /* Begin PBXFileReference section */
 		79771EFD2912A88D00EF974D /* SignUpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewModel.swift; sourceTree = "<group>"; };
 		79771EFF2912AE3100EF974D /* SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewModel.swift; sourceTree = "<group>"; };
+		79771F012912B35700EF974D /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		797C9565291127BB0009BDBA /* NewFeedbackContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewFeedbackContentView.swift; sourceTree = "<group>"; };
 		79B7E2F72907BAB8000C5D8F /* TwitterAnalog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TwitterAnalog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		79B7E2FA2907BAB8000C5D8F /* TwitterAnalogApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterAnalogApp.swift; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 				79B7E3142907EEBA000C5D8F /* Network */,
 				79B7E33029083154000C5D8F /* Extensions */,
 				79B7E33529092F9D000C5D8F /* Services */,
+				79771F012912B35700EF974D /* ViewModel.swift */,
 				79771EFA2912A86800EF974D /* Auth */,
 				79B7E30D2907C282000C5D8F /* FreshTwitsContentView.swift */,
 				79B7E3112907CB7E000C5D8F /* SettingsContentView.swift */,
@@ -311,6 +314,7 @@
 				79B7E3202907EEBA000C5D8F /* HTTPClient.swift in Sources */,
 				79B7E31E2907EEBA000C5D8F /* HTTPMethod.swift in Sources */,
 				79B7E341290A99A0000C5D8F /* FolowersRequest.swift in Sources */,
+				79771F022912B35700EF974D /* ViewModel.swift in Sources */,
 				79B7E3272907F106000C5D8F /* IModel.swift in Sources */,
 				79771EFE2912A88D00EF974D /* SignUpViewModel.swift in Sources */,
 				79B7E2FD2907BAB8000C5D8F /* SignUpContentView.swift in Sources */,

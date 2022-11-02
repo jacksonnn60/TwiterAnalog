@@ -7,36 +7,29 @@
 
 import SwiftUI
 
-struct SignUpContentView: View {
+struct SignUpContentView<ViewModel: SignUpViewModel>: View {
     
-    @ObservedObject var viewModel: SignUpViewModel
-    
-//    let authService = AuthService.shared
-//    @Binding var isLoggedIn: Bool
-    
-    @State var email: String = ""
-    @State var password: String = ""
-    @State var login: String = ""
+    @ObservedObject var viewModel: ViewModel
     
     var body: some View {
         NavigationStack {
             VStack {
-                TextField("Email", text: $email)
+                TextField("Email", text: $viewModel.email)
                     .textFieldStyle(.roundedBorder)
                     .speechSpellsOutCharacters(false)
                     .textInputAutocapitalization(.never)
-                TextField("Password", text: $password)
+                TextField("Password", text: $viewModel.password)
                     .textFieldStyle(.roundedBorder)
                     .speechSpellsOutCharacters(false)
                     .textInputAutocapitalization(.never)
-                TextField("Nickname", text: $login)
+                TextField("Login", text: $viewModel.login)
                     .textFieldStyle(.roundedBorder)
                     .speechSpellsOutCharacters(false)
                     .textInputAutocapitalization(.never)
                 Spacer()
 
                 Button("Sign up") {
-                    viewModel.signUp(email: email, login: login, password: password)
+                    viewModel.signUp()
                 }
                 .padding(.bottom)
                 
@@ -47,6 +40,9 @@ struct SignUpContentView: View {
                         .font(.system(size: 12, weight: .semibold))
                 }
                 
+            }
+            .alert(String(describing: viewModel.requestError ?? "Something went wrong"),
+                   isPresented: $viewModel.errorDidOccured) {
             }
             .navigationDestination(isPresented: $viewModel.userDidSignUp) {
                 TabBarContentView()

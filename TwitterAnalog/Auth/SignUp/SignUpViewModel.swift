@@ -8,9 +8,22 @@
 import Foundation
 import SwiftUI
 
-final class SignUpViewModel: ObservableObject {
+final class SignUpViewModel: ViewModel {
     
-    @Published var userDidSignUp: Bool = .init(false)
+    var requestError: Error? = nil {
+        didSet {
+            guard requestError != nil else {
+                return
+            }
+            errorDidOccured = true
+        }
+    }
+    @Published var errorDidOccured: Bool = false
+    
+    @Published var userDidSignUp = false
+    @Published var email = ""
+    @Published var password = ""
+    @Published var login = ""
     
     private let authService: AuthService
     
@@ -18,15 +31,13 @@ final class SignUpViewModel: ObservableObject {
         self.authService = authService
     }
     
-    func signUp(email: String, login: String, password: String) {
-        authService.signUp(with: .init(email: email, password: password, login: login)) { [weak self] result in
-            switch result {
-            case .success:
-                DispatchQueue.main.async {
-                    self?.userDidSignUp = true
+    func signUp() {
+        authService.signUp(with: .init(email: email, password: password, login: login)) { [weak self] response in
+            DispatchQueue.main.async {
+                switch response {
+                case .success: self?.userDidSignUp = true
+                case .failure(let error): self?.requestError = error
                 }
-            case .failure(let error):
-                print(error)
             }
         }
     }
