@@ -73,6 +73,7 @@ struct NewTwitContentView: View {
                     .frame(height: 0.5)
                     .padding([.leading, .top, .trailing])
             }
+            .padding(.top)
         }
     }
 }

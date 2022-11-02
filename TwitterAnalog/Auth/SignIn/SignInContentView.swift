@@ -9,8 +9,7 @@ import SwiftUI
 
 struct SignInContentView: View {
     
-    let authService = AuthService.shared
-    @Binding var isLoggedIn: Bool
+    @ObservedObject var viewModel: SignInViewModel
     
     @State var email: String = ""
     @State var password: String = ""
@@ -29,13 +28,12 @@ struct SignInContentView: View {
                 Spacer()
                 
                 Button("Sign In") {
-                    authService.signIn(with: .init(email: email, password: password)) {
-                        switch $0 {
-                        case .success: isLoggedIn = true
-                        case .failure(let error): print(error)
-                        }
-                    }
+                    viewModel.signIn(email: email, password: password)
                 }
+            }
+            .navigationDestination(isPresented: $viewModel.userDidSignIn) {
+                TabBarContentView()
+                    .navigationBarHidden(true)
             }
             .navigationTitle("Sign in")
             .padding()
@@ -45,6 +43,6 @@ struct SignInContentView: View {
 
 struct SignInContentView_Previews: PreviewProvider {
     static var previews: some View {
-        SignInContentView(isLoggedIn: .init(projectedValue: .constant(false)))
+        SignInContentView(viewModel: .init(authService: .shared))
     }
 }

@@ -9,12 +9,14 @@ import SwiftUI
 
 struct SignUpContentView: View {
     
-    let authService = AuthService.shared
-    @Binding var isLoggedIn: Bool
+    @ObservedObject var viewModel: SignUpViewModel
+    
+//    let authService = AuthService.shared
+//    @Binding var isLoggedIn: Bool
     
     @State var email: String = ""
     @State var password: String = ""
-    @State var nickname: String = ""
+    @State var login: String = ""
     
     var body: some View {
         NavigationStack {
@@ -27,29 +29,28 @@ struct SignUpContentView: View {
                     .textFieldStyle(.roundedBorder)
                     .speechSpellsOutCharacters(false)
                     .textInputAutocapitalization(.never)
-                TextField("Nickname", text: $nickname)
+                TextField("Nickname", text: $login)
                     .textFieldStyle(.roundedBorder)
                     .speechSpellsOutCharacters(false)
                     .textInputAutocapitalization(.never)
                 Spacer()
 
                 Button("Sign up") {
-                    authService.signUp(with: .init(email: email, password: password, login: nickname)) {
-                        switch $0 {
-                        case .success: isLoggedIn = true
-                        case .failure(let error): print(error)
-                        }
-                    }
+                    viewModel.signUp(email: email, login: login, password: password)
                 }
                 .padding(.bottom)
                 
                 NavigationLink {
-                    SignInContentView(isLoggedIn: $isLoggedIn)
+                    SignInContentView(viewModel: .init(authService: .shared))
                 } label: {
                     Text("Already have account")
                         .font(.system(size: 12, weight: .semibold))
                 }
-
+                
+            }
+            .navigationDestination(isPresented: $viewModel.userDidSignUp) {
+                TabBarContentView()
+                    .navigationBarHidden(true)
             }
             .navigationTitle("Sign Up")
             .padding()
@@ -59,6 +60,6 @@ struct SignUpContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        SignUpContentView(isLoggedIn: .init(projectedValue: .constant(false)))
+        SignUpContentView(viewModel: .init(authService: .shared))
     }
 }

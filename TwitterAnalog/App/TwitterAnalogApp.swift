@@ -9,16 +9,12 @@ import SwiftUI
 
 @main
 struct TwitterAnalogApp: App {
-    
-    @State private var isLoggedIn = false
+        
+    let signUpViewModel = SignUpViewModel(authService: .shared)
     
     var body: some Scene {
         WindowGroup {
-            if isLoggedIn {
-                TabBarContentView()
-            } else {
-                SignUpContentView(isLoggedIn: $isLoggedIn)
-            }
+            SignUpContentView(viewModel: signUpViewModel)
         }
     }
 }

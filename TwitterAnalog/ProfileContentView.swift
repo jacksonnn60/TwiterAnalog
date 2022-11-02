@@ -110,20 +110,19 @@ struct ProfileContentView: View {
                     // TODO: Add new twit...
                     isPresentedNewTwitSheet = true
                 } label: {
-                    ZStack {
-                        Circle()
-                            .frame(width: 64, height: 64)
-                            .shadow(radius: 5)
-                        Text("+")
-                            .foregroundColor(.white)
-                            .font(.system(size: 38))
-                    }
+                    Circle()
+                        .frame(width: 64.0, height: 64.0)
+                        .overlay {
+                            Image(systemName: "pencil.circle")
+                                .foregroundColor(.white)
+                                .font(.system(size: 38, weight: .regular))
+                        }
+                        .shadow(radius: 3)
                 }
                 .offset(.init(width: proxy.size.width / 2 - 48, height: proxy.size.height / 2 - 48))
             }
             .sheet(isPresented: $isPresentedNewTwitSheet, onDismiss: {
                 withAnimation {
-                    // TODO: Get posts by real id...
                     twitService.getPosts(by: AuthService.shared.userInfo?.userID ?? "") { result in
                         switch result {
                         case .success(let posts): myPosts = posts
@@ -152,12 +151,6 @@ struct ProfileContentView: View {
                         case .failure(let error): print(error)
                         }
                     }
-//                    AuthService.shared.getUserInfo(userID: AuthService.shared.userInfo?.userID ?? "") { result in
-//                        switch result {
-//                        case .success(let userInfo): AuthService.shared.userInfo = userInfo
-//                        case .failure(let error): print(error)
-//                        }
-//                    }
                 }
             }
         }

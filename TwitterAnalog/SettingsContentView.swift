@@ -9,13 +9,14 @@ import SwiftUI
 
 struct SettingsContentView: View {
     var body: some View {
-        List {
-            HStack {
-                Text("Theme")
-                Spacer()
-                Text("Light")
-            }
-        }
+        Text("Settings")
+//        List {
+//            HStack {
+//                Text("Theme")
+//                Spacer()
+//                Text("Light")
+//            }
+//        }
     }
 }
 
