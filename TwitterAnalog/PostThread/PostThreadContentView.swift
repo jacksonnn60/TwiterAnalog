@@ -7,13 +7,9 @@
 
 import SwiftUI
 
-struct PostThreadContentView: View {
+struct PostThreadContentView<ViewModel: PostThreadViewModel>: View {
     
-    @State var post: Post = .init(id: .init(), ownerID: .init(), ownerName: "--", content: "--", timeInterval: 0.0, likes: [], feedbackIDs: [])
-    
-    let twitService = TwitsService(httpClient: .init(urlSession: .init(configuration: .default)))
-    
-    @State var feedbacks: [TwitsService.Feedback] = []
+    @ObservedObject var viewModel: ViewModel
     
     var body: some View {
         ScrollView {
@@ -23,28 +19,26 @@ struct PostThreadContentView: View {
                         .resizable()
                         .frame(width: 64, height: 64)
                         .foregroundColor(.blue)
-                    Text(post.ownerName)
+                    Text(viewModel.post.ownerName)
                         .font(.system(size: 24, weight: .bold))
                     Spacer()
-                    Text(Date(timeIntervalSince1970: post.timeInterval ?? 0).getString(formated: .default))
+                    Text(Date(timeIntervalSince1970: viewModel.post.timeInterval ?? 0).getString(formated: .default))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.gray)
                 }
                 .padding([.leading, .trailing])
                 
-                Text(post.content)
+                Text(viewModel.post.content)
                     .padding([.leading, .trailing])
                 
                 HStack(spacing: 30) {
                     
                     HStack(spacing: 3) {
-                        Text("\(post.likes?.count ?? 0)")
+                        Text("\(viewModel.post.likes?.count ?? 0)")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.gray)
-                        
-                        let isLiked = (post.likes ?? []).contains(where: {$0 == AuthService.shared.userInfo?.userID})
-                        
-                        Image(systemName: isLiked ? "heart.fill" : "heart")
+                                                
+                        Image(systemName: viewModel.isLikedPost ? "heart.fill" : "heart")
                             .frame(width: 22, height: 22)
                             .foregroundColor(.gray)
                             .fontWeight(.semibold)
@@ -70,7 +64,7 @@ struct PostThreadContentView: View {
                     }
                     
                     HStack(spacing: 3) {
-                        Text("\(post.feedbackIDs?.count ?? 0)")
+                        Text("\(viewModel.post.feedbackIDs?.count ?? 0)")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.gray)
                         Image(systemName: "bubble.left")
@@ -92,7 +86,7 @@ struct PostThreadContentView: View {
                 
                 
                 LazyVGrid(columns: [.init(.flexible(), spacing: 0, alignment: .center)]) {
-                    ForEach(feedbacks) { feedback in
+                    ForEach(viewModel.feedbacks) { feedback in
                         VStack(alignment: .leading) {
                             HStack {
                                 Image(systemName: "person.circle")
@@ -117,30 +111,12 @@ struct PostThreadContentView: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.gray)
                                 
-                                let isLiked = (feedback.likes ?? []).contains(where: { $0 == AuthService.shared.userInfo?.userID ?? "" } )
-                                
-                                Image(systemName: isLiked ? "heart.fill" : "heart")
+                                Image(systemName: viewModel.isLikedFeedback(feedback: feedback) ? "heart.fill" : "heart")
                                     .frame(width: 22, height: 22)
                                     .foregroundColor(.gray)
                                     .fontWeight(.semibold)
                                     .onTapGesture {
-                                        
-                                        twitService.toggleFeedbackLike(userID: AuthService.shared.userInfo?.userID ?? "", feedbackID: feedback.id ?? "") { result in
-                                            switch result {
-                                            case .success:
-                                                withAnimation {
-                                                    twitService.getFeedbacks(for: post.id?.uuidString ?? "") { result in
-                                                        switch result {
-                                                        case .success(let feedbacks): self.feedbacks = feedbacks.sorted { $0.timeInterval ?? 0.0  > $1.timeInterval ?? 0.0 }
-                                                        case .failure(let failure): print(failure)
-                                                        }
-                                                    }
-                                                }
-                                            case .failure(let failure):
-                                                print(failure)
-                                            }
-                                        }
-                                        
+                                        viewModel.toggleLike(feedbackID: feedback.id ?? "")
                                     }
                             }
                             .frame(maxWidth: .infinity)
@@ -156,13 +132,7 @@ struct PostThreadContentView: View {
             }
             .onAppear {
                 withAnimation {
-                    twitService.getFeedbacks(for: post.id?.uuidString ?? "") { result in
-                        switch result {
-                        case .success(let feedbacks):
-                            self.feedbacks = feedbacks.sorted { $0.timeInterval ?? 0.0  > $1.timeInterval ?? 0.0 }
-                        case .failure(let failure): print(failure)
-                        }
-                    }
+                    viewModel.fetchFeedbacks()
                 }
             }
         }
@@ -171,6 +141,6 @@ struct PostThreadContentView: View {
 
 struct PostThreadContentVIew_Previews: PreviewProvider {
     static var previews: some View {
-        PostThreadContentView(post: .init(id: .init(), ownerID: .init(), ownerName: "Yevhen Basistyi", content: "", timeInterval: .init(), likes: .init(), feedbackIDs: .init()))
+        PostThreadContentView(viewModel: .init(twitsService: .init(httpClient: .init(urlSession: .shared)), selectedPost: .init(id: .init(), ownerID: .init(), ownerName: .init(), content: .init(), timeInterval: .init(), likes: .init(), feedbackIDs: .init())))
     }
 }

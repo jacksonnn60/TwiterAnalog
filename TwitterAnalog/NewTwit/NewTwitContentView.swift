@@ -7,12 +7,10 @@
 
 import SwiftUI
 
-struct NewTwitContentView: View {
+struct NewTwitContentView<ViewModel: NewTwitViewModel>: View {
     
-    var twitService: TwitsService = TwitsService(httpClient: .init(urlSession: .shared))
-    
-    @State private var twitContext: String = ""
-    
+    @ObservedObject var viewModel: ViewModel
+
     @Binding var isPresented: Bool
     
     var body: some View {
@@ -29,7 +27,7 @@ struct NewTwitContentView: View {
                             .font(.system(size: 24, weight: .semibold))
                         
                         ZStack(alignment: .leading) {
-                            if twitContext.isEmpty {
+                            if viewModel.twitContext.isEmpty {
                                 VStack {
                                     Text("Write something...")
                                         .padding(.top, 10)
@@ -38,9 +36,9 @@ struct NewTwitContentView: View {
                                 }
                             }
                             VStack {
-                                TextEditor(text: $twitContext)
+                                TextEditor(text: $viewModel.twitContext)
                                     .frame(minHeight: 75, maxHeight: 300)
-                                    .opacity(twitContext.isEmpty ? 0.75 : 1)
+                                    .opacity(viewModel.twitContext.isEmpty ? 0.75 : 1)
                                 Spacer()
                             }
                         }
@@ -51,15 +49,8 @@ struct NewTwitContentView: View {
                 }.padding(.leading)
                 
                 Button {
-                    twitService.createPost(
-                        with: .init(ownerID: AuthService.shared.userInfo?.userID ?? "",
-                                    ownerName: AuthService.shared.userInfo?.userName ?? "--",
-                                    content: twitContext)
-                    ) {
-                        switch $0 {
-                        case .success: isPresented = false
-                        case .failure(let error): print(error)
-                        }
+                    viewModel.createPost { screenShouldBePresented in
+                        isPresented = screenShouldBePresented
                     }
                 } label: {
                     Text("Post")
@@ -80,6 +71,6 @@ struct NewTwitContentView: View {
 
 struct NewTwitContentView_Previews: PreviewProvider {
     static var previews: some View {
-        NewTwitContentView(isPresented: .constant(false))
+        NewTwitContentView(viewModel: .init(twitsService: .init(httpClient: .init(urlSession: .shared))), isPresented: .constant(false))
     }
 }

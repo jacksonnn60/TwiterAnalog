@@ -10,11 +10,11 @@ import SwiftUI
 struct TabBarContentView: View {
     var body: some View {
         TabView {
-            FreshTwitsContentView()
+            FreshTwitsContentView(viewModel: .init(searchService: .init(httpClient: .init(urlSession: .shared)), twitsService: .init(httpClient: .init(urlSession: .shared))))
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
-            ProfileContentView()
+            ProfileContentView(viewModel: .init(twitsService: .init(httpClient: .init(urlSession: .shared))))
                 .tabItem {
                     Label("Me", systemImage: "person")
                 }

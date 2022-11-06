@@ -12,7 +12,7 @@ struct OtherProfileContentView: View {
     var twitService = TwitsService(httpClient: .init(urlSession: .shared))
     var followersService = FollowersService(httpClient: .init(urlSession: .shared))
     
-    let searchedPerson: SearchedPerson
+    let searchedPerson: SearchService.SearchedPerson
     
     @State var posts: [Post] = []
     
@@ -32,9 +32,6 @@ struct OtherProfileContentView: View {
                             .background(Color.white)
                             .frame(width: 84, height: 84)
                             .clipShape(Circle())
-//                            .overlay(content: {
-//                                Circle().stroke(Color.white)
-//                            })
                             .offset(CGSize(width: 0, height: 15))
                             .foregroundColor(.blue)
                     }

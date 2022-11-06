@@ -9,17 +9,7 @@ import Foundation
 
 import SwiftUI
 
-final class SignInViewModel: ViewModel {
-    
-    var requestError: Error? = nil {
-        didSet {
-            guard requestError != nil else {
-                return
-            }
-            errorDidOccured = true
-        }
-    }
-    @Published var errorDidOccured: Bool = false
+final class SignInViewModel: ObservableViewModel {
     
     @Published var userDidSignIn = false
     @Published var email = ""
@@ -36,7 +26,7 @@ final class SignInViewModel: ViewModel {
             DispatchQueue.main.async {
                 switch response {
                 case .success: self?.userDidSignIn = true
-                case .failure(let error): self?.requestError = error
+                case .failure(let error): self?.error = error
                 }
             }
         }

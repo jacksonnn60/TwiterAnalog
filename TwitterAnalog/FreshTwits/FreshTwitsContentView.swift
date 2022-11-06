@@ -7,44 +7,17 @@
 
 import SwiftUI
 
-struct SearchedPerson: IModel, Identifiable {
-    let id: String
-    let name: String
-}
-
-struct FreshTwitsContentView: View {
+struct FreshTwitsContentView<ViewModel: FreshTwitsViewModel>: View {
     
-    var searchService: SearchService = SearchService(httpClient: .init(urlSession: .shared))
-    var twitsService: TwitsService = TwitsService(httpClient: .init(urlSession: .shared))
-    
-    // SEARH MODE:
-    @State var interestedPersonName: String = ""
-    @State var interestedPeople: [SearchedPerson] = []
-    
-    // TWITS MODE:
-    @State var posts: [Post] = []
-    @State var isPresentedReplyView = false
-    @State var isPresentedPostThread = false
-    @State var selectedPost: Post?
+    @ObservedObject var viewModel: ViewModel
     
     var body: some View {
         NavigationStack {
             VStack {
                 HStack {
-                    TextField("Find someone to follow...", text: $interestedPersonName)
-                        .onChange(of: interestedPersonName) { query in
-                            if !query.isEmpty {
-                                searchService.searchUsers(with: query) { result in
-                                    switch result {
-                                    case .success(let searchedPeople):
-                                        interestedPeople = searchedPeople.filter { $0.id != AuthService.shared.userInfo?.userID ?? "" }
-                                    case .failure(let failure):
-                                        print(failure)
-                                    }
-                                }
-                            } else {
-                                interestedPeople.removeAll()
-                            }
+                    TextField("Find someone to follow...", text: $viewModel.interestedPersonName)
+                        .onChange(of: viewModel.interestedPersonName) { query in
+                            viewModel.searchUsers()
                         }
                         .textInputAutocapitalization(.never)
                         .speechSpellsOutCharacters(false)
@@ -52,9 +25,9 @@ struct FreshTwitsContentView: View {
                         .padding()
                 }
                 
-                if !interestedPeople.isEmpty {
+                if !viewModel.interestedPeople.isEmpty {
                     List {
-                        ForEach(interestedPeople) { person in
+                        ForEach(viewModel.interestedPeople) { person in
                             NavigationLink {
                                 OtherProfileContentView(searchedPerson: person)
                             } label: {
@@ -71,37 +44,15 @@ struct FreshTwitsContentView: View {
                     .listStyle(.plain)
                 } else {
                     List {
-                        ForEach(posts) { post in
+                        ForEach(viewModel.posts) { post in
                             TwitRowView(post: post, hearButtonDidTap: { post in
-                                
-                                twitsService.toggleLike(
-                                    userID: AuthService.shared.userInfo?.userID ?? "",
-                                    twitID: post.id?.uuidString ?? "") { result in
-                                        
-                                        switch result {
-                                        case .success:
-                                            
-                                            twitsService.getFreshPosts(by: AuthService.shared.userInfo?.userID ?? .init()) { result in
-                                                switch result {
-                                                case .success(let posts):
-                                                    self.posts = posts
-                                                        .sorted { $0.timeInterval ?? 0.0  > $1.timeInterval ?? 0.0 }
-                                                case .failure(let failure):
-                                                    print(failure)
-                                                }
-                                            }
-                                            
-                                        case .failure(let failure):
-                                            print(failure)
-                                        }
-                                    }
-                                
+                                viewModel.toggleLike(twitID: post.id?.uuidString ?? "")
                             }, chatIconDidTap: { post in
-                                selectedPost = post
-                                isPresentedReplyView = true
+                                viewModel.selectedPost = post
+                                viewModel.isPresentedReplyView = true
                             }, showPostThreadButtonDidTap: { post in
-                                selectedPost = post
-                                isPresentedPostThread = true
+                                viewModel.selectedPost = post
+                                viewModel.isPresentedPostThread = true
                             })
                             .background(
                                 NavigationLink(destination: OtherProfileContentView(searchedPerson: .init(id: post.ownerID.uuidString, name: post.ownerName))) {
@@ -115,42 +66,24 @@ struct FreshTwitsContentView: View {
                 }
                 
                 Spacer()
-                
             }
             .onAppear {
                 withAnimation {
-                    twitsService.getFreshPosts(by: AuthService.shared.userInfo?.userID ?? .init()) { result in
-                        switch result {
-                        case .success(let posts):
-                            self.posts = posts
-                                .sorted { $0.timeInterval ?? 0.0  > $1.timeInterval ?? 0.0 }
-                        case .failure(let failure):
-                            print(failure)
-                        }
-                    }
+                    viewModel.fetchFreshPosts()
                 }
             }
-            .navigationDestination(isPresented: $isPresentedPostThread, destination: {
-                if let selectedPost = self.selectedPost {
-                    PostThreadContentView(post: selectedPost)
+            .navigationDestination(isPresented: $viewModel.isPresentedPostThread, destination: {
+                if let selectedPost = viewModel.selectedPost {
+                    PostThreadContentView(viewModel: .init(twitsService: .init(httpClient: .init(urlSession: .shared)), selectedPost: selectedPost))
                 }
             })
-            .sheet(isPresented: $isPresentedReplyView) {
-                twitsService.getFreshPosts(by: AuthService.shared.userInfo?.userID ?? .init()) { result in
-                    switch result {
-                    case .success(let posts):
-                        self.posts = posts
-                            .sorted { $0.timeInterval ?? 0.0  > $1.timeInterval ?? 0.0 }
-                    case .failure(let failure):
-                        print(failure)
-                    }
-                }
+            .sheet(isPresented: $viewModel.isPresentedReplyView) {
+                viewModel.fetchFreshPosts()
             } content: {
-                if let postToReply = self.selectedPost {
-                    NewFeedbackContentView(isPresented: $isPresentedReplyView, post: postToReply)
+                if let postToReply = viewModel.selectedPost {
+                    NewFeedbackContentView(isPresented: $viewModel.isPresentedReplyView, post: postToReply)
                 }
             }
-
         }
     }
 }
@@ -244,11 +177,7 @@ struct TwitRowView: View {
 
 struct FreshTwitsContentView_Previews: PreviewProvider {
     static var previews: some View {
-        FreshTwitsContentView(posts:
-                                [
-                                    .init(id: .init(), ownerID: .init(), ownerName: "4234 Name", content: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,", timeInterval: 0.0, likes: [], feedbackIDs: []),
-                                    .init(id: .init(), ownerID: .init(), ownerName: "234234 Name", content: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.", timeInterval: 0.0, likes: [], feedbackIDs: [])
-                                ]
+        FreshTwitsContentView(viewModel: .init(searchService: .init(httpClient: .init(urlSession: .shared)), twitsService: .init(httpClient: .init(urlSession: .shared)))
         )
     }
 }

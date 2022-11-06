@@ -41,7 +41,7 @@ struct SignUpContentView<ViewModel: SignUpViewModel>: View {
                 }
                 
             }
-            .alert(String(describing: viewModel.requestError ?? "Something went wrong"),
+            .alert(String(describing: viewModel.error ?? "Something went wrong"),
                    isPresented: $viewModel.errorDidOccured) {
             }
             .navigationDestination(isPresented: $viewModel.userDidSignUp) {

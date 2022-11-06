@@ -28,7 +28,7 @@ struct SignInContentView<ViewModel: SignInViewModel>: View {
                     viewModel.signIn()
                 }
             }
-            .alert(String(describing: viewModel.requestError ?? "Something went wrong"),
+            .alert(String(describing: viewModel.error ?? "Something went wrong"),
                    isPresented: $viewModel.errorDidOccured) {
             }
             .navigationDestination(isPresented: $viewModel.userDidSignIn) {

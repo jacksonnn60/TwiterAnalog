@@ -7,11 +7,9 @@
 
 import SwiftUI
 
-struct ProfileContentView: View {
+struct ProfileContentView<ViewModel: ProfileViewModel>: View {
     
-    private var twitService: TwitsService = TwitsService(httpClient: .init(urlSession: .shared))
-    @State private var isPresentedNewTwitSheet: Bool = false
-    @State private var myPosts: [Post] = []
+    @ObservedObject var viewModel: ViewModel
     
     var body: some View {
         GeometryReader { proxy in
@@ -34,14 +32,14 @@ struct ProfileContentView: View {
                 
                 VStack(alignment: .leading) {
                     VStack(alignment: .leading) {
-                        Text(AuthService.shared.userInfo?.userName ?? "Nickname")
+                        Text(viewModel.userInfo.userName)
                             .font(.system(size: 26, weight: .semibold))
                         Text("About person information")
                             .font(.system(size: 15))
                         
                         HStack(spacing: 5) {
                             HStack(spacing: 5) {
-                                Text("\(AuthService.shared.userInfo?.folowingsIDs.count ?? 0)")
+                                Text("\(viewModel.userInfo.folowingsIDs.count)")
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundColor(.primary)
                                 Text("folowings")
@@ -52,7 +50,7 @@ struct ProfileContentView: View {
                                     }
                             }
                             HStack(spacing: 5) {
-                                Text("\(AuthService.shared.userInfo?.folowersIDs.count ?? 0)")
+                                Text("\(viewModel.userInfo.folowersIDs.count)")
                                     .font(.system(size: 13, weight: .semibold))
                                 Text("folowers")
                                     .font(.system(size: 13))
@@ -62,7 +60,7 @@ struct ProfileContentView: View {
                                     }
                             }
                             HStack(spacing: 5) {
-                                Text("\(myPosts.count)")
+                                Text("\(viewModel.myPosts.count)")
                                     .font(.system(size: 13, weight: .semibold))
                                 Text("twits")
                                     .font(.system(size: 13))
@@ -74,29 +72,9 @@ struct ProfileContentView: View {
                 }
                 
                 List {
-                    ForEach(myPosts) {
+                    ForEach(viewModel.myPosts) {
                         TwitRowView(post: $0, hearButtonDidTap: { post in
-                            twitService.toggleLike(
-                                userID: AuthService.shared.userInfo?.userID ?? "",
-                                twitID: post.id?.uuidString ?? "") { result in
-                                    
-                                switch result {
-                                case .success:
-                                    
-                                    twitService.getPosts(by: AuthService.shared.userInfo?.userID ?? .init()) { result in
-                                        switch result {
-                                        case .success(let posts):
-                                            self.myPosts = posts
-                                                .sorted { $0.timeInterval ?? 0.0  > $1.timeInterval ?? 0.0 }
-                                        case .failure(let failure):
-                                            print(failure)
-                                        }
-                                    }
-                                    
-                                case .failure(let failure):
-                                    print(failure)
-                                }
-                            }
+                            viewModel.toggleLike(twitID: post.id?.uuidString ?? "")
                         })
                         .listRowBackground(Color.clear)
                     }
@@ -107,8 +85,7 @@ struct ProfileContentView: View {
             .ignoresSafeArea(edges: .top)
             .overlay {
                 Button {
-                    // TODO: Add new twit...
-                    isPresentedNewTwitSheet = true
+                    viewModel.isPresentedNewTwitSheet = true
                 } label: {
                     Circle()
                         .frame(width: 64.0, height: 64.0)
@@ -121,36 +98,16 @@ struct ProfileContentView: View {
                 }
                 .offset(.init(width: proxy.size.width / 2 - 48, height: proxy.size.height / 2 - 48))
             }
-            .sheet(isPresented: $isPresentedNewTwitSheet, onDismiss: {
+            .sheet(isPresented: $viewModel.isPresentedNewTwitSheet, onDismiss: {
                 withAnimation {
-                    twitService.getPosts(by: AuthService.shared.userInfo?.userID ?? "") { result in
-                        switch result {
-                        case .success(let posts): myPosts = posts
-                        case .failure(let error): print(error)
-                        }
-                    }
+                    viewModel.fetchPosts()
                 }
             }, content: {
-                NewTwitContentView(isPresented: $isPresentedNewTwitSheet)
+                NewTwitContentView(viewModel: .init(twitsService: .init(httpClient: .init(urlSession: .shared))), isPresented: $viewModel.isPresentedNewTwitSheet)
             })
             .onAppear {
                 withAnimation {
-                    // TODO: Get posts by real id...
-                    AuthService.shared.getUserInfo(userID: AuthService.shared.userInfo?.userID ?? "") { result in
-                        switch result {
-                        case .success(let userInfo):
-                            AuthService.shared.userInfo = userInfo
-                            
-                            twitService.getPosts(by: AuthService.shared.userInfo?.userID ?? "") { result in
-                                switch result {
-                                case .success(let posts):
-                                    myPosts = posts
-                                case .failure(let error): print(error)
-                                }
-                            }
-                        case .failure(let error): print(error)
-                        }
-                    }
+                    viewModel.fetchUserInformation()
                 }
             }
         }
@@ -159,6 +116,6 @@ struct ProfileContentView: View {
 
 struct ProfileContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileContentView()
+        ProfileContentView(viewModel: .init(twitsService: .init(httpClient: .init(urlSession: .shared))))
     }
 }

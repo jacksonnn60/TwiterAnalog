@@ -10,13 +10,6 @@ import SwiftUI
 struct SettingsContentView: View {
     var body: some View {
         Text("Settings")
-//        List {
-//            HStack {
-//                Text("Theme")
-//                Spacer()
-//                Text("Light")
-//            }
-//        }
     }
 }
 

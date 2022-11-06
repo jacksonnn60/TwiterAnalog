@@ -8,6 +8,12 @@
 import Foundation
 
 final class SearchService {
+    
+    struct SearchedPerson: IModel, Identifiable {
+        let id: String
+        let name: String
+    }
+    
     let httpClient: HTTPClient
     
     init(httpClient: HTTPClient) {
