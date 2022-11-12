@@ -147,7 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				79B7E30C2907C25A000C5D8F /* App */,
-				79B7E3142907EEBA000C5D8F /* Network */,
+				79B7E3142907EEBA000C5D8F /* NetworkLayer */,
 				79B7E33029083154000C5D8F /* Extensions */,
 				79B7E33529092F9D000C5D8F /* Services */,
 				79771F012912B35700EF974D /* ObservableViewModel.swift */,
@@ -182,7 +182,7 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		79B7E3142907EEBA000C5D8F /* Network */ = {
+		79B7E3142907EEBA000C5D8F /* NetworkLayer */ = {
 			isa = PBXGroup;
 			children = (
 				79B7E3172907EEBA000C5D8F /* Requests */,
@@ -195,8 +195,8 @@
 				79B7E3262907F106000C5D8F /* IModel.swift */,
 				79B7E3282907F52B000C5D8F /* Response.swift */,
 			);
-			name = Network;
-			path = "../../../Downloads/IMDBTestAppUIKit-main/IMDBAppUIKit/Network";
+			name = NetworkLayer;
+			path = "../../../Downloads/IMDBTestAppUIKit-main/IMDBAppUIKit/NetworkLayer";
 			sourceTree = "<group>";
 		};
 		79B7E3172907EEBA000C5D8F /* Requests */ = {
